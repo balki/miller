@@ -51,7 +51,7 @@ func transformerGrepParseCLI(
 	pargi *int,
 	argc int,
 	args []string,
-	_ *cli.TOptions,
+	options *cli.TOptions,
 	doConstruct bool, // false for first pass of CLI-parse, true for second pass
 ) IRecordTransformer {
 
@@ -122,6 +122,8 @@ func transformerGrepParseCLI(
 		regexp,
 		invert,
 		valuesOnly,
+		options.WriterOptions.OFS,
+		options.WriterOptions.OPS,
 	)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -136,17 +138,23 @@ type TransformerGrep struct {
 	regexp     *regexp.Regexp
 	invert     bool
 	valuesOnly bool
+	ofs        string
+	ops        string
 }
 
 func NewTransformerGrep(
 	regexp *regexp.Regexp,
 	invert bool,
 	valuesOnly bool,
+	ofs string,
+	ops string,
 ) (*TransformerGrep, error) {
 	tr := &TransformerGrep{
 		regexp:     regexp,
 		invert:     invert,
 		valuesOnly: valuesOnly,
+		ofs:        ofs,
+		ops:        ops,
 	}
 	return tr, nil
 }
@@ -164,9 +172,9 @@ func (tr *TransformerGrep) Transform(
 		inrec := inrecAndContext.Record
 		var inrecAsString string
 		if tr.valuesOnly {
-			inrecAsString = inrec.ToNIDXString()
+			inrecAsString = inrec.ToNIDXString(tr.ofs)
 		} else {
-			inrecAsString = inrec.ToDKVPString()
+			inrecAsString = inrec.ToDKVPString(tr.ofs, tr.ops)
 		}
 		matches := tr.regexp.Match([]byte(inrecAsString))
 		if tr.invert {

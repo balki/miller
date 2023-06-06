@@ -12,28 +12,28 @@ func (mlrmap *Mlrmap) Print() {
 	os.Stdout.WriteString("\n")
 }
 func (mlrmap *Mlrmap) Fprint(file *os.File) {
-	(*file).WriteString(mlrmap.ToDKVPString())
+	(*file).WriteString(mlrmap.ToDKVPString(",", "="))
 }
 
-func (mlrmap *Mlrmap) ToDKVPString() string {
+func (mlrmap *Mlrmap) ToDKVPString(ofs, ops string) string {
 	var buffer bytes.Buffer // stdio is non-buffered in Go, so buffer for ~5x speed increase
 	for pe := mlrmap.Head; pe != nil; pe = pe.Next {
 		buffer.WriteString(pe.Key)
-		buffer.WriteString("=")
+		buffer.WriteString(ops)
 		buffer.WriteString(pe.Value.String())
 		if pe.Next != nil {
-			buffer.WriteString(",")
+			buffer.WriteString(ofs)
 		}
 	}
 	return buffer.String()
 }
 
-func (mlrmap *Mlrmap) ToNIDXString() string {
+func (mlrmap *Mlrmap) ToNIDXString(ofs string) string {
 	var buffer bytes.Buffer // stdio is non-buffered in Go, so buffer for ~5x speed increase
 	for pe := mlrmap.Head; pe != nil; pe = pe.Next {
 		buffer.WriteString(pe.Value.String())
 		if pe.Next != nil {
-			buffer.WriteString(",")
+			buffer.WriteString(ofs)
 		}
 	}
 	return buffer.String()
